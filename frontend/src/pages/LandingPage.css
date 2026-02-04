@@ -1,0 +1,587 @@
+.landing-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #5b21b6 0%, #9f7aea 50%, #7c3aed 100%);
+  background-attachment: fixed;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 40px;
+  z-index: 100;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: white;
+  cursor: pointer;
+}
+
+.logo-icon {
+  width: 50px;
+  height: 50px;
+  filter: drop-shadow(0 2px 8px rgba(124, 58, 237, 0.2));
+}
+
+.logo-text {
+  font-size: 1.4rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #a78bfa 0%, #c4b5fd 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.5px;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 600;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.nav-link:hover {
+  opacity: 1;
+}
+
+.nav-cta {
+  background: linear-gradient(90deg, #7c3aed 0%, #a78bfa 100%);
+  color: white;
+  padding: 10px 24px;
+  border-radius: 25px;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 0.95rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.2);
+}
+
+.nav-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3);
+}
+
+.landing-page::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  animation: pulse 20s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.landing-container {
+  max-width: 1200px;
+  width: 100%;
+  text-align: center;
+  color: white;
+  position: relative;
+  z-index: 1;
+  margin-top: 70px;
+}
+
+.landing-header {
+  margin-bottom: 60px;
+}
+
+.landing-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.landing-subtitle {
+  font-size: 1.5rem;
+  opacity: 0.9;
+  margin-bottom: 15px;
+}
+
+.landing-description {
+  font-size: 1.1rem;
+  opacity: 0.95;
+  line-height: 1.8;
+  margin-bottom: 30px;
+  max-width: 600px;
+}
+
+.landing-trust {
+  font-size: 0.95rem;
+  opacity: 0.85;
+  margin-top: 20px;
+  font-weight: 500;
+}
+
+.landing-hero {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 30px;
+  align-items: center;
+  margin-bottom: 50px;
+}
+
+.hero-text {
+  text-align: left;
+  padding-right: 20px;
+}
+
+.hero-images {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  height: 380px;
+}
+
+.hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 3px solid rgba(255,255,255,0.12);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+}
+
+.hero-image.active {
+  opacity: 1;
+  z-index: 2;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.feature-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  padding: 40px 30px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.feature-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+}
+
+.feature-card h2 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.feature-card p {
+  font-size: 1rem;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+.landing-actions {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 15px 40px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, #7c3aed 0%, #a78bfa 100%);
+  color: white;
+  font-weight: 800;
+  box-shadow: 0 8px 30px rgba(124, 58, 237, 0.28);
+  border: 1px solid rgba(255,255,255,0.06);
+  letter-spacing: 0.2px;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-4px) scale(1.03);
+  filter: brightness(1.02);
+  box-shadow: 0 18px 50px rgba(124, 58, 237, 0.28);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-weight: 800;
+  backdrop-filter: blur(6px);
+  transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+}
+
+.btn:focus {
+  outline: 3px solid rgba(167, 139, 250, 0.18);
+  outline-offset: 2px;
+}
+
+.landing-footer {
+  margin-top: 60px;
+  padding-top: 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  opacity: 0.8;
+}
+
+.cofounder-section {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  padding: 60px 40px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  margin-bottom: 60px;
+}
+
+.cofounder-section h2 {
+  font-size: 2.5rem;
+  margin-bottom: 40px;
+  font-weight: 700;
+}
+
+.cofounder-card {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 40px;
+  align-items: center;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.cofounder-image {
+  width: 100%;
+  height: 350px;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.cofounder-info {
+  text-align: left;
+}
+
+.cofounder-info h3 {
+  font-size: 2rem;
+  margin-bottom: 5px;
+  font-weight: 700;
+}
+
+.cofounder-title {
+  font-size: 1.1rem;
+  opacity: 0.85;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+.cofounder-bio {
+  font-size: 1rem;
+  opacity: 0.9;
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+.cofounder-quote {
+  font-size: 1.2rem;
+  font-style: italic;
+  opacity: 0.95;
+  border-left: 4px solid rgba(255, 255, 255, 0.5);
+  padding-left: 20px;
+  margin-top: 30px;
+}
+
+.landing-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin-bottom: 60px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 50px 40px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-number {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.stat-label {
+  font-size: 1.1rem;
+  opacity: 0.85;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .landing-navbar {
+    padding: 0 20px;
+    height: 60px;
+  }
+
+  .logo-text {
+    font-size: 1rem;
+  }
+
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .navbar-links {
+    gap: 12px;
+  }
+
+  .nav-cta {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+
+  .landing-container {
+    margin-top: 60px;
+  }
+
+  .landing-page {
+    padding: 15px;
+  }
+
+  .landing-title {
+    font-size: 2rem;
+  }
+
+  .landing-subtitle {
+    font-size: 1rem;
+  }
+
+  .landing-description {
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+  }
+
+  .features {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .feature-card {
+    padding: 30px 20px;
+  }
+
+  .feature-icon {
+    font-size: 3rem;
+  }
+
+  .feature-card h2 {
+    font-size: 1.2rem;
+  }
+
+  .landing-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    max-width: 100%;
+    padding: 12px 30px;
+    font-size: 1rem;
+  }
+
+  .landing-hero {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .hero-text {
+    padding-right: 0;
+    text-align: center;
+  }
+
+  .hero-images {
+    height: 250px;
+  }
+
+  .cofounder-section {
+    padding: 40px 20px;
+    margin-bottom: 40px;
+  }
+
+  .cofounder-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+  }
+
+  .cofounder-card {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .cofounder-image {
+    height: 250px;
+  }
+
+  .cofounder-info {
+    text-align: center;
+  }
+
+  .cofounder-info h3 {
+    font-size: 1.5rem;
+  }
+
+  .cofounder-title {
+    font-size: 1rem;
+  }
+
+  .cofounder-bio {
+    font-size: 0.95rem;
+  }
+
+  .cofounder-quote {
+    border-left: none;
+    border-top: 2px solid rgba(255, 255, 255, 0.5);
+    padding-left: 0;
+    padding-top: 15px;
+    text-align: center;
+  }
+
+  .landing-stats {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 30px 20px;
+  }
+
+  .stat-number {
+    font-size: 2rem;
+  }
+
+  .stat-label {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .landing-navbar {
+    padding: 0 15px;
+  }
+
+  .logo-text {
+    display: none;
+  }
+
+  .logo-icon {
+    width: 35px;
+    height: 35px;
+  }
+
+  .nav-link {
+    display: none;
+  }
+
+  .nav-cta {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+
+  .landing-title {
+    font-size: 1.5rem;
+  }
+
+  .landing-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .landing-description {
+    font-size: 0.85rem;
+  }
+
+  .feature-card p {
+    font-size: 0.9rem;
+  }
+
+  .hero-images {
+    height: 200px;
+  }
+
+  .cofounder-section h2 {
+    font-size: 1.4rem;
+  }
+
+  .cofounder-info h3 {
+    font-size: 1.2rem;
+  }
+
+  .btn {
+    padding: 10px 25px;
+    font-size: 0.9rem;
+  }
+}
