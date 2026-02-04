@@ -51,10 +51,10 @@ const AdminPage = () => {
           <button className="btn-back" onClick={() => setSelectedSubmission(null)}>← Back</button>
           
           <div className="detail-card">
-            <h3>Gift Card Submission Details</h3>
+            <h3>{selectedSubmission.type === 'dwt-purchase' ? '🪙 DWT Purchase Details' : 'Gift Card Submission Details'}</h3>
             <div className="detail-row">
-              <label>Full Name:</label>
-              <span>{selectedSubmission.fullName}</span>
+              <label>Name:</label>
+              <span>{selectedSubmission.fullName || selectedSubmission.name}</span>
             </div>
             <div className="detail-row">
               <label>Email:</label>
@@ -65,13 +65,21 @@ const AdminPage = () => {
               <span>{selectedSubmission.phone}</span>
             </div>
             <div className="detail-row">
-              <label>Amount:</label>
-              <span>${selectedSubmission.amount}</span>
+              <label>{selectedSubmission.type === 'dwt-purchase' ? 'Amount (DWT):' : 'Amount ($):'}</label>
+              <span>{selectedSubmission.amount}</span>
             </div>
-            <div className="detail-row">
-              <label>DWT Tokens:</label>
-              <span>{Math.floor(selectedSubmission.amount / 50)}</span>
-            </div>
+            {selectedSubmission.type === 'dwt-purchase' && (
+              <div className="detail-row">
+                <label>Price:</label>
+                <span>${selectedSubmission.price?.toFixed(2)}</span>
+              </div>
+            )}
+            {selectedSubmission.type !== 'dwt-purchase' && (
+              <div className="detail-row">
+                <label>DWT Tokens:</label>
+                <span>{Math.floor(selectedSubmission.amount / 50)}</span>
+              </div>
+            )}
             <div className="detail-row">
               <label>User ID:</label>
               <span>{selectedSubmission.userId}</span>
@@ -97,28 +105,41 @@ const AdminPage = () => {
             </div>
 
             <div className="detail-images">
-              <h4>Gift Card Images</h4>
+              <h4>{selectedSubmission.type === 'dwt-purchase' ? 'Payment Proof' : 'Gift Card Images'}</h4>
               <div className="image-grid">
-                {selectedSubmission.images.map((img, idx) => (
-                  <div key={idx} className="image-container">
-                    <p>Image {idx + 1}</p>
-                    <img src={img} alt={`submission-${idx}`} />
-                  </div>
-                ))}
+                {selectedSubmission.images ? (
+                  Array.isArray(selectedSubmission.images) ? (
+                    selectedSubmission.images.map((img, idx) => (
+                      <div key={idx} className="image-container">
+                        <p>Image {idx + 1}</p>
+                        <img src={img} alt={`submission-${idx}`} />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="image-container">
+                      <img src={selectedSubmission.image || selectedSubmission.images} alt="payment-proof" />
+                    </div>
+                  )
+                ) : (
+                  <p>No images available</p>
+                )}
               </div>
             </div>
           </div>
         </div>
       ) : (
         <div className="submissions-table">
+          <div className="table-header">
+            <h3>All Submissions</h3>
+          </div>
           <table>
             <thead>
               <tr>
+                <th>Type</th>
                 <th>Name</th>
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Amount</th>
-                <th>Tokens</th>
                 <th>Status</th>
                 <th>Submitted</th>
                 <th>Action</th>
@@ -132,11 +153,20 @@ const AdminPage = () => {
               ) : (
                 submissions.map(sub => (
                   <tr key={sub.id}>
-                    <td>{sub.fullName}</td>
+                    <td>
+                      <span className={`type-badge ${sub.type === 'dwt-purchase' ? 'dwt' : 'gift'}`}>
+                        {sub.type === 'dwt-purchase' ? '🪙 DWT' : '🎁 Gift Card'}
+                      </span>
+                    </td>
+                    <td>{sub.fullName || sub.name}</td>
                     <td>{sub.email}</td>
                     <td>{sub.phone}</td>
-                    <td>${sub.amount}</td>
-                    <td>{Math.floor(sub.amount / 50)}</td>
+                    <td>
+                      {sub.type === 'dwt-purchase' 
+                        ? `${sub.amount} DWT ($${sub.price?.toFixed(2)})`
+                        : `$${sub.amount}`
+                      }
+                    </td>
                     <td>
                       <span className={`status-badge ${sub.status}`}>
                         {sub.status}
