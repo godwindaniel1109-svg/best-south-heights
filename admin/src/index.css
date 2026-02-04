@@ -1,0 +1,8 @@
+body{font-family:Inter,system-ui,Arial,sans-serif;margin:20px}
+.admin-page table{width:100%;border-collapse:collapse}
+.admin-page th, .admin-page td{border:1px solid #eee;padding:8px}
+.chat-window{height:400px;overflow:auto;border:1px solid #ddd;padding:12px;margin-bottom:12px}
+.chat-msg{margin-bottom:10px}
+.chat-msg .meta{font-size:0.8rem;color:#666}
+.chat-msg img{max-width:200px;border-radius:8px}
+.chat-inputs{display:flex;gap:8px;align-items:center}

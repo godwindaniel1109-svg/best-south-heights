@@ -2,11 +2,21 @@ const express = require('express')
 const cors = require('cors')
 const axios = require('axios')
 const FormData = require('form-data')
+const multer = require('multer')
+const fs = require('fs')
+const path = require('path')
+const http = require('http')
+const { Server } = require('socket.io')
 require('dotenv').config()
 
 const app = express()
+const server = http.createServer(app)
+const io = new Server(server, {
+  cors: { origin: '*' }
+})
+
 app.use(cors())
-app.use(express.json({ limit: '10mb' }))
+app.use(express.json({ limit: '20mb' }))
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID
@@ -15,12 +25,31 @@ if (!BOT_TOKEN || !CHAT_ID) {
   console.warn('Warning: TELEGRAM_BOT_TOKEN or TELEGRAM_ADMIN_CHAT_ID not set. Set them in .env for Telegram forwarding to work.')
 }
 
-// In-memory storage for gift card submissions (demo — use DB in production)
+// Ensure uploads directory exists
+const UPLOAD_DIR = path.join(__dirname, 'public', 'uploads')
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true })
+
+// Multer setup for handling media uploads (images, audio)
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, UPLOAD_DIR),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname) || ''
+    cb(null, `${Date.now()}-${Math.random().toString(36).slice(2,8)}${ext}`)
+  }
+})
+const upload = multer({ storage, limits: { fileSize: 25 * 1024 * 1024 } }) // 25MB limit
+
+// In-memory storage for demo (use DB in production)
 let submissions = []
+let users = []
+let messages = []
 
 app.get('/', (req, res) => {
   res.json({ ok: true, message: 'Pennysavia backend running' })
 })
+
+// serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')))
 
 app.post('/api/send-telegram', async (req, res) => {
   try {
@@ -159,7 +188,69 @@ app.patch('/api/admin/submissions/:id', (req, res) => {
   return res.json({ ok: true, submission })
 })
 
+// Admin: list users
+app.get('/api/admin/users', (req, res) => {
+  return res.json({ users })
+})
+
+// Admin: update user (role / banned)
+app.patch('/api/admin/users/:id', (req, res) => {
+  const { id } = req.params
+  const { role, banned } = req.body
+  const user = users.find(u => u.id === id)
+  if (!user) return res.status(404).json({ error: 'User not found' })
+  if (role) user.role = role
+  if (typeof banned === 'boolean') user.banned = banned
+  return res.json({ ok: true, user })
+})
+
+// Upload endpoint for chat media (images, voice notes)
+app.post('/api/upload', upload.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' })
+  const url = `/uploads/${req.file.filename}`
+  return res.json({ ok: true, url })
+})
+
+// Messages persistence endpoint (simple)
+app.get('/api/messages', (req, res) => {
+  return res.json({ messages })
+})
+
+// Socket.IO chat handling
+io.on('connection', socket => {
+  console.log('socket connected', socket.id)
+
+  socket.on('joinRoom', ({ room, user }) => {
+    socket.join(room)
+    socket.data.user = user
+    socket.to(room).emit('systemMessage', { text: `${user?.userName || 'User'} joined the room`, timestamp: Date.now() })
+  })
+
+  socket.on('leaveRoom', ({ room, user }) => {
+    socket.leave(room)
+    socket.to(room).emit('systemMessage', { text: `${user?.userName || 'User'} left the room`, timestamp: Date.now() })
+  })
+
+  socket.on('chatMessage', (payload) => {
+    // payload: { room, user, text }
+    const msg = { id: Date.now().toString(), type: 'text', ...payload, timestamp: Date.now() }
+    messages.push(msg)
+    io.to(payload.room).emit('chatMessage', msg)
+  })
+
+  socket.on('chatMedia', (payload) => {
+    // payload: { room, user, url, mediaType }
+    const msg = { id: Date.now().toString(), type: payload.mediaType || 'media', ...payload, timestamp: Date.now() }
+    messages.push(msg)
+    io.to(payload.room).emit('chatMessage', msg)
+  })
+
+  socket.on('disconnect', () => {
+    // optional: broadcast disconnect
+  })
+})
+
 const PORT = process.env.PORT || 4000
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`✅ Pennysavia backend listening on port ${PORT}`)
 })
