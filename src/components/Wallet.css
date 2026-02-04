@@ -1,0 +1,96 @@
+.wallet-card {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  border-radius: 20px;
+  padding: 25px;
+  color: white;
+  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.wallet-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4);
+}
+
+.wallet-header {
+  margin-bottom: 20px;
+}
+
+.wallet-header h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.wallet-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.wallet-balance {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.balance-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.balance-amount {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.wallet-dwt {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.dwt-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.dwt-amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.wallet-pending {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: rgba(255, 193, 7, 0.25);
+  border-radius: 12px;
+  margin-top: 10px;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.pending-label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.pending-amount {
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.wallet-info {
+  margin-top: 10px;
+}
+
+.info-text {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  line-height: 1.4;
+  margin: 0;
+}
