@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import axios from 'axios'
 import { useAuth } from '../context/AuthContext'
+import Chat from './Chat'
 import './BuyDWTPage.css'
 
 const BuyDWTPage = () => {
@@ -16,7 +17,43 @@ const BuyDWTPage = () => {
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [expandedFaq, setExpandedFaq] = useState(null)
   const DWT_PRICE = 50 // $50 USD per DWT
+
+  const faqs = [
+    {
+      question: "How do I add a card to buy DWT tokens?",
+      answer: "Fill out the form above with your name, email, phone number, and select how many DWT tokens you want. Upload a payment proof image (screenshot of your bank transfer, payment app, or card payment), and submit. Admin will review and approve your request within 24 hours."
+    },
+    {
+      question: "What payment methods are accepted?",
+      answer: "We accept bank transfers, credit/debit card payments, mobile wallets (PayPal, Google Pay, Apple Pay), and cryptocurrency transfers. Simply upload proof of payment after completing your transaction."
+    },
+    {
+      question: "How much do DWT tokens cost?",
+      answer: "Each DWT token costs $50 USD. You can buy 1 or more tokens at a time. For example: 2 tokens = $100, 5 tokens = $250."
+    },
+    {
+      question: "What will I get after approval?",
+      answer: "Once your payment is approved by admin, your DWT tokens will be added to your account. You can then use them to: (1) View exclusive job opportunities, (2) Withdraw funds from your wallet, (3) Access premium features."
+    },
+    {
+      question: "How long does approval take?",
+      answer: "Admin reviews submissions within 24 hours. Most approvals happen within 2-4 hours. You'll see the status change in your account dashboard, and we'll send you a notification."
+    },
+    {
+      question: "Can I get a refund?",
+      answer: "Yes! If your payment is rejected, you can request a full refund within 30 days. Contact our support team via chat for refund requests."
+    },
+    {
+      question: "How many tokens do I need?",
+      answer: "You need at least 1 DWT token to view job opportunities. Each job withdrawal requires 1 DWT token. We recommend buying 3-5 tokens if you plan to apply for multiple jobs."
+    },
+    {
+      question: "Are tokens refundable?",
+      answer: "Tokens are non-refundable once used. However, if you purchase tokens and never use them, you can request a refund within 30 days of purchase."
+    }
+  ]
 
   const handleImageChange = (e) => {
     const file = e.target.files[0]
@@ -121,6 +158,9 @@ const BuyDWTPage = () => {
       </div>
 
       <div className="buy-dwt-content">
+        <div className="embedded-chat">
+          <Chat />
+        </div>
         <div className="dwt-info-card">
           <h3>DWT Information</h3>
           <ul>
@@ -229,6 +269,28 @@ const BuyDWTPage = () => {
             {loading ? 'Submitting...' : 'Submit Purchase Request'}
           </button>
         </form>
+
+        <div className="faq-section">
+          <h3>❓ Frequently Asked Questions</h3>
+          <div className="faq-container">
+            {faqs.map((faq, idx) => (
+              <div key={idx} className="faq-item">
+                <button
+                  className="faq-question"
+                  onClick={() => setExpandedFaq(expandedFaq === idx ? null : idx)}
+                >
+                  <span>{faq.question}</span>
+                  <span className={`faq-icon ${expandedFaq === idx ? 'open' : ''}`}>▼</span>
+                </button>
+                {expandedFaq === idx && (
+                  <div className="faq-answer">
+                    {faq.answer}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
 
         {pendingPurchases.length > 0 && (
           <div className="pending-purchases">
