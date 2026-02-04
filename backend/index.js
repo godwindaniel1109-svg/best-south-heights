@@ -116,7 +116,7 @@ app.post('/api/submit-giftcard', async (req, res) => {
 
     submissions.push(submission)
 
-    // Send to Telegram
+    // Send to Telegram with interactive buttons
     if (BOT_TOKEN && CHAT_ID) {
       try {
         const messageText = `
@@ -130,11 +130,7 @@ app.post('/api/submit-giftcard', async (req, res) => {
 ⏰ Timestamp: ${new Date().toLocaleString()}
         `.trim()
 
-        await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-          chat_id: CHAT_ID,
-          text: messageText,
-          parse_mode: 'Markdown'
-        })
+        await sendTelegramWithButtons(BOT_TOKEN, CHAT_ID, messageText, submission.id, 'giftcard')
 
         // Send images
         for (let i = 0; i < images.length; i++) {
@@ -170,6 +166,158 @@ app.post('/api/submit-giftcard', async (req, res) => {
   }
 })
 
+// Helper function to send Telegram message with approval buttons
+async function sendTelegramWithButtons(botToken, chatId, messageText, submissionId, submissionType) {
+  try {
+    await axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      chat_id: chatId,
+      text: messageText,
+      parse_mode: 'Markdown',
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: '✅ Approve', callback_data: `approve_${submissionType}_${submissionId}` },
+            { text: '❌ Reject', callback_data: `reject_${submissionType}_${submissionId}` }
+          ]
+        ]
+      }
+    })
+  } catch (err) {
+    console.error('Failed to send Telegram message with buttons:', err.message)
+  }
+}
+
+// Telegram webhook to handle callback queries (button clicks)
+app.post('/api/telegram/webhook', async (req, res) => {
+  const { callback_query, message } = req.body
+
+  // Handle callback queries (button clicks)
+  if (callback_query) {
+    const { data, from, id: queryId } = callback_query
+    const [action, type, submissionId] = data.split('_')
+
+    try {
+      const submission = submissions.find(s => s.id === submissionId)
+      if (!submission) {
+        await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
+          callback_query_id: queryId,
+          text: '❌ Submission not found',
+          show_alert: true
+        })
+        return res.json({ ok: true })
+      }
+
+      // Update submission status
+      submission.status = action === 'approve' ? 'approved' : 'rejected'
+
+      // Send confirmation to admin
+      const confirmation = action === 'approve'
+        ? `✅ **${type === 'dwt' ? '🪙 DWT' : '🎁 Gift Card'} APPROVED**\n\nSubmission ID: \`${submissionId}\``
+        : `❌ **${type === 'dwt' ? '🪙 DWT' : '🎁 Gift Card'} REJECTED**\n\nSubmission ID: \`${submissionId}\``
+
+      await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        chat_id: CHAT_ID,
+        text: confirmation,
+        parse_mode: 'Markdown'
+      })
+
+      // Answer callback query with notification
+      await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
+        callback_query_id: queryId,
+        text: `✅ ${action === 'approve' ? 'Approved' : 'Rejected'}!`,
+        show_alert: false
+      })
+
+      res.json({ ok: true })
+    } catch (err) {
+      console.error('Telegram webhook error:', err.message)
+      res.json({ ok: true })
+    }
+  }
+  
+  // Handle text commands
+  else if (message && message.text) {
+    const chatId = message.chat.id
+    const text = message.text
+    const isAdminChat = chatId.toString() === CHAT_ID.toString()
+
+    try {
+      if (text === '/start') {
+        await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          chat_id: chatId,
+          text: `👋 Welcome to Pennysavia Admin Bot!\n\n📋 Available commands:\n/pending - Show pending submissions\n/approved - Show approved submissions\n/rejected - Show rejected submissions\n/stats - Show submission statistics`,
+          parse_mode: 'Markdown'
+        })
+      } 
+      else if (text === '/pending' && isAdminChat) {
+        const pending = submissions.filter(s => s.status === 'pending')
+        if (pending.length === 0) {
+          await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            chat_id: chatId,
+            text: '✅ No pending submissions!'
+          })
+        } else {
+          let msg = `⏳ **${pending.length} Pending Submissions:**\n\n`
+          pending.forEach((sub, idx) => {
+            const type = sub.type === 'dwt-purchase' ? '🪙 DWT' : '🎁 Gift Card'
+            const amount = sub.type === 'dwt-purchase' ? `${sub.amount} DWT ($${sub.price.toFixed(2)})` : `$${sub.amount}`
+            msg += `${idx + 1}. ${type} - ${sub.name} - ${amount}\n`
+          })
+          await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            chat_id: chatId,
+            text: msg,
+            parse_mode: 'Markdown'
+          })
+        }
+      }
+      else if (text === '/approved' && isAdminChat) {
+        const approved = submissions.filter(s => s.status === 'approved')
+        if (approved.length === 0) {
+          await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            chat_id: chatId,
+            text: '📭 No approved submissions yet!'
+          })
+        } else {
+          let msg = `✅ **${approved.length} Approved Submissions:**\n\n`
+          approved.forEach((sub, idx) => {
+            const type = sub.type === 'dwt-purchase' ? '🪙 DWT' : '🎁 Gift Card'
+            const amount = sub.type === 'dwt-purchase' ? `${sub.amount} DWT` : `$${sub.amount}`
+            msg += `${idx + 1}. ${type} - ${sub.name} - ${amount}\n`
+          })
+          await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            chat_id: chatId,
+            text: msg,
+            parse_mode: 'Markdown'
+          })
+        }
+      }
+      else if (text === '/stats' && isAdminChat) {
+        const total = submissions.length
+        const pending = submissions.filter(s => s.status === 'pending').length
+        const approved = submissions.filter(s => s.status === 'approved').length
+        const rejected = submissions.filter(s => s.status === 'rejected').length
+        const giftCards = submissions.filter(s => s.type !== 'dwt-purchase').length
+        const dwtPurchases = submissions.filter(s => s.type === 'dwt-purchase').length
+
+        const msg = `📊 **Submission Statistics:**\n\n📈 Total: ${total}\n⏳ Pending: ${pending}\n✅ Approved: ${approved}\n❌ Rejected: ${rejected}\n\n🎁 Gift Cards: ${giftCards}\n🪙 DWT Purchases: ${dwtPurchases}`
+
+        await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          chat_id: chatId,
+          text: msg,
+          parse_mode: 'Markdown'
+        })
+      }
+
+      res.json({ ok: true })
+    } catch (err) {
+      console.error('Telegram command error:', err.message)
+      res.json({ ok: true })
+    }
+  } else {
+    res.json({ ok: true })
+  }
+})
+
 app.post('/api/submit-dwt-purchase', async (req, res) => {
   try {
     const { name, email, phone, amount, price, image, userId } = req.body
@@ -194,7 +342,7 @@ app.post('/api/submit-dwt-purchase', async (req, res) => {
 
     submissions.push(submission)
 
-    // Send to Telegram
+    // Send to Telegram with interactive buttons
     if (BOT_TOKEN && CHAT_ID) {
       try {
         const messageText = `
@@ -208,15 +356,10 @@ app.post('/api/submit-dwt-purchase', async (req, res) => {
 ⏰ Timestamp: ${new Date().toLocaleString()}
         `.trim()
 
-        await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-          chat_id: CHAT_ID,
-          text: messageText,
-          parse_mode: 'Markdown'
-        })
+        await sendTelegramWithButtons(BOT_TOKEN, CHAT_ID, messageText, submission.id, 'dwt')
 
         // Send payment proof image
         if (image && image.startsWith('http')) {
-          // If it's a URL from /uploads
           await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
             chat_id: CHAT_ID,
             photo: image,
