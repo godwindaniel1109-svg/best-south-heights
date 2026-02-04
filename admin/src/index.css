@@ -6,3 +6,17 @@ body{font-family:Inter,system-ui,Arial,sans-serif;margin:20px}
 .chat-msg .meta{font-size:0.8rem;color:#666}
 .chat-msg img{max-width:200px;border-radius:8px}
 .chat-inputs{display:flex;gap:8px;align-items:center}
+
+/* Responsive for admin */
+@media (max-width: 768px) {
+	body{margin:12px}
+	.chat-window{height:320px}
+	.chat-msg img{max-width:140px}
+	.admin-page table{font-size:0.9rem}
+	.chat-inputs{flex-direction:column;align-items:stretch}
+}
+
+@media (max-width: 480px) {
+	.chat-window{height:260px}
+	.chat-msg img{max-width:120px}
+}

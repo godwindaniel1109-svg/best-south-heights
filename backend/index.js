@@ -204,6 +204,17 @@ app.patch('/api/admin/users/:id', (req, res) => {
   return res.json({ ok: true, user })
 })
 
+// Admin: send message to user (server-side route for admin tooling)
+app.post('/api/admin/message', (req, res) => {
+  const { toUserId, fromUser, text } = req.body
+  if (!toUserId || !text) return res.status(400).json({ error: 'Missing toUserId or text' })
+  const room = `user:${toUserId}`
+  const msg = { id: Date.now().toString(), type: 'text', room, user: fromUser || { userName: 'Admin' }, text, timestamp: Date.now(), private: true }
+  messages.push(msg)
+  io.to(room).emit('chatMessage', msg)
+  return res.json({ ok: true, msg })
+})
+
 // Upload endpoint for chat media (images, voice notes)
 app.post('/api/upload', upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' })
@@ -221,7 +232,9 @@ io.on('connection', socket => {
   console.log('socket connected', socket.id)
 
   socket.on('joinRoom', ({ room, user }) => {
+    // Join the general room and also a user-specific room if user.id provided
     socket.join(room)
+    if (user && user.id) socket.join(`user:${user.id}`)
     socket.data.user = user
     socket.to(room).emit('systemMessage', { text: `${user?.userName || 'User'} joined the room`, timestamp: Date.now() })
   })
@@ -243,6 +256,15 @@ io.on('connection', socket => {
     const msg = { id: Date.now().toString(), type: payload.mediaType || 'media', ...payload, timestamp: Date.now() }
     messages.push(msg)
     io.to(payload.room).emit('chatMessage', msg)
+  })
+
+  // Admin-private: allow server to notify a specific user by emitting to their user room
+  socket.on('privateMessage', (payload) => {
+    // payload: { toUserId, fromUser, text }
+    const room = `user:${payload.toUserId}`
+    const msg = { id: Date.now().toString(), type: 'text', room, user: payload.fromUser, text: payload.text, timestamp: Date.now(), private: true }
+    messages.push(msg)
+    io.to(room).emit('chatMessage', msg)
   })
 
   socket.on('disconnect', () => {

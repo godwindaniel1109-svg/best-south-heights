@@ -10,6 +10,8 @@ export default function ChatPage(){
   const [messages, setMessages] = useState([])
   const [text, setText] = useState('')
   const fileRef = useRef()
+  const urlParams = new URLSearchParams(window.location.search)
+  const dmUser = urlParams.get('user')
 
   useEffect(()=>{
     // fetch history
@@ -18,9 +20,13 @@ export default function ChatPage(){
     socket.on('chatMessage', msg => setMessages(prev=>[...prev, msg]))
     socket.on('systemMessage', msg => setMessages(prev=>[...prev, { id: Date.now().toString(), type: 'system', ...msg }]))
 
-    socket.emit('joinRoom', { room, user: { userName: 'Admin' } })
+    const targetRoom = dmUser ? `user:${dmUser}` : 'global'
+    setRoom(targetRoom)
+    socket.emit('joinRoom', { room: 'global', user: { userName: 'Admin' } })
+    socket.emit('joinRoom', { room: targetRoom, user: { userName: 'Admin' } })
     return ()=>{
-      socket.emit('leaveRoom', { room, user: { userName: 'Admin' } })
+      socket.emit('leaveRoom', { room: 'global', user: { userName: 'Admin' } })
+      socket.emit('leaveRoom', { room: targetRoom, user: { userName: 'Admin' } })
       socket.off('chatMessage')
       socket.off('systemMessage')
     }
@@ -29,6 +35,8 @@ export default function ChatPage(){
   function sendText(){
     if(!text) return
     socket.emit('chatMessage', { room, user: { userName: 'Admin' }, text })
+    // if DM mode, also send via REST to ensure user receives when not connected
+    if (dmUser) sendDMviaAPI(text)
     setText('')
   }
 
@@ -40,6 +48,12 @@ export default function ChatPage(){
     const res = await axios.post('/api/upload', fd)
     const url = res.data.url
     socket.emit('chatMedia', { room, user: { userName: 'Admin' }, url, mediaType: file.type.startsWith('audio') ? 'audio' : 'image' })
+  }
+
+  // send direct message to a user via REST if DM mode
+  async function sendDMviaAPI(text){
+    if(!dmUser) return
+    await axios.post('/api/admin/message', { toUserId: dmUser, fromUser: { userName: 'Admin' }, text })
   }
 
   return (

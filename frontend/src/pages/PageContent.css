@@ -405,6 +405,25 @@
   color: #333;
 }
 
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .withdraw-content { grid-template-columns: 1fr; }
+  .balance-info { grid-template-columns: 1fr; }
+  .rewards-grid { grid-template-columns: 1fr; }
+  .rewards-intro { display: block; }
+  .jobs-list { grid-template-columns: 1fr; }
+  .page-header h2 { font-size: 1.4rem; }
+  .btn-primary { padding: 12px 20px; }
+}
+
+@media (max-width: 480px) {
+  .page-content { padding: 12px 10px; }
+  .summary-card { padding: 12px; }
+  .form-group input { padding: 10px; font-size: 0.95rem; }
+  .btn-primary { padding: 10px 18px; font-size: 0.95rem; }
+  .chat-window { height: 300px; }
+}
+
 .referral-info ul {
   list-style: none;
   padding: 0;

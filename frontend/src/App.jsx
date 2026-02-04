@@ -5,6 +5,7 @@ import RegisterPage from './pages/RegisterPage'
 import Dashboard from './pages/Dashboard'
 import AdminPage from './pages/AdminPage'
 import RewardsPage from './pages/RewardsPage'
+import Chat from './pages/Chat'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import './App.css'
 
@@ -43,6 +44,14 @@ function App() {
                 <RewardsPage />
               </ProtectedRoute>
             } 
+          />
+          <Route 
+            path="/chat" 
+            element={
+              <ProtectedRoute>
+                <Chat />
+              </ProtectedRoute>
+            }
           />
           <Route 
             path="/admin" 

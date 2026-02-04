@@ -1,0 +1,12 @@
+[build]
+  publish = "frontend/dist"
+  command = "cd frontend && npm ci && npm run build"
+
+[context.production.environment]
+  NODE_ENV = "production"
+
+[redirects]
+# Proxy API requests to backend (set BACKEND_URL in Netlify environment variables)
+  from = "/api/*"
+  to = "${BACKEND_URL}/api/:splat"
+  status = 200

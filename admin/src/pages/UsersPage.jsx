@@ -32,6 +32,7 @@ export default function UsersPage(){
               <td>
                 <button onClick={()=>makeAdmin(u)}>Toggle Admin</button>
                 <button onClick={()=>toggleBan(u)}>{u.banned? 'Unban' : 'Ban'}</button>
+                <a href={`/admin/chat?user=${u.id}`} style={{marginLeft:8}}>Message</a>
               </td>
             </tr>
           ))}
