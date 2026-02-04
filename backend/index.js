@@ -170,6 +170,76 @@ app.post('/api/submit-giftcard', async (req, res) => {
   }
 })
 
+app.post('/api/submit-dwt-purchase', async (req, res) => {
+  try {
+    const { name, email, phone, amount, price, image, userId } = req.body
+    
+    if (!name || !email || !phone || !amount || !price || !image) {
+      return res.status(400).json({ error: 'Missing required fields' })
+    }
+
+    const submission = {
+      id: Date.now().toString(),
+      timestamp: new Date().toISOString(),
+      type: 'dwt-purchase',
+      name,
+      email,
+      phone,
+      amount,
+      price,
+      userId,
+      image,
+      status: 'pending'
+    }
+
+    submissions.push(submission)
+
+    // Send to Telegram
+    if (BOT_TOKEN && CHAT_ID) {
+      try {
+        const messageText = `
+🪙 **NEW DWT PURCHASE REQUEST**
+👤 Name: ${name}
+📧 Email: ${email}
+📱 Phone: ${phone}
+💵 Amount: ${amount} DWT
+💰 Price: $${price.toFixed(2)}
+🆔 User ID: ${userId}
+⏰ Timestamp: ${new Date().toLocaleString()}
+        `.trim()
+
+        await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          chat_id: CHAT_ID,
+          text: messageText,
+          parse_mode: 'Markdown'
+        })
+
+        // Send payment proof image
+        if (image && image.startsWith('http')) {
+          // If it's a URL from /uploads
+          await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+            chat_id: CHAT_ID,
+            photo: image,
+            caption: `Payment Proof for ${amount} DWT`
+          })
+        }
+      } catch (tgErr) {
+        console.error('Telegram notification error:', tgErr.message)
+        // Continue even if Telegram fails
+      }
+    }
+
+    return res.json({ 
+      ok: true, 
+      message: 'DWT purchase request submitted',
+      submissionId: submission.id
+    })
+  } catch (err) {
+    console.error('Submit DWT purchase error:', err.message)
+    return res.status(500).json({ error: 'Failed to submit DWT purchase request' })
+  }
+})
+
 app.get('/api/admin/submissions', (req, res) => {
   // Demo: no auth required for now — add auth in production
   return res.json({ submissions })

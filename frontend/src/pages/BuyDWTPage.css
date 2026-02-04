@@ -75,12 +75,39 @@
   border-color: #667eea;
 }
 
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="tel"] {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="email"]:focus,
+.form-group input[type="tel"]:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
 .form-group input[type="file"] {
   width: 100%;
   padding: 12px;
   border: 2px solid #e0e0e0;
   border-radius: 8px;
   background: white;
+}
+
+.error-message {
+  background: #fee;
+  color: #c33;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  border: 1px solid #fcc;
 }
 
 .price-display {
